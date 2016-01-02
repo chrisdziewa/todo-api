@@ -19,10 +19,13 @@ app.get('/todos', function(req, res) {
   var filteredTodos = todos;
 
   if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
-    filteredTodos = _.where(filteredTodos, {completed: true});
-  }
-  else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
-    filteredTodos = _.where(filteredTodos, {completed: false});
+    filteredTodos = _.where(filteredTodos, {
+      completed: true
+    });
+  } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
+    filteredTodos = _.where(filteredTodos, {
+      completed: false
+    });
   }
 
   // If description 'q' parameter passed in
@@ -46,11 +49,12 @@ app.get('/todos', function(req, res) {
 // GET /todos/:id
 app.get('/todos/:id', function(req, res) {
   var id = parseInt(req.params.id, 10);
-  var matchedTodo = _.findWhere(todos, {id: id});
+  var matchedTodo = _.findWhere(todos, {
+    id: id
+  });
   if (matchedTodo) {
     res.json(matchedTodo);
-  }
-  else {
+  } else {
     res.status(404).send('404 Error - Page not found');
   }
 });
@@ -71,19 +75,25 @@ app.post('/todos', function(req, res) {
 // DELETE
 app.delete('/todos/:id', function(req, res) {
   var id = parseInt(req.params.id, 10);
-  var matchedTodo = _.findWhere(todos, {id: id});
+  var matchedTodo = _.findWhere(todos, {
+    id: id
+  });
   if (matchedTodo) {
     todos = _.without(todos, matchedTodo);
     res.send('Todo item has been deleted');
   } else {
-    res.status(404).send({"error": "no todo found with that id"});
+    res.status(404).send({
+      "error": "no todo found with that id"
+    });
   }
 });
 
 // PUT
 app.put('/todos/:id', function(req, res) {
   var id = parseInt(req.params.id, 10);
-  var matchedTodo = _.findWhere(todos, {id: id});
+  var matchedTodo = _.findWhere(todos, {
+    id: id
+  });
   var body = _.pick(req.body, 'description', 'completed');
   var validAttributes = {};
 
@@ -97,10 +107,10 @@ app.put('/todos/:id', function(req, res) {
     return res.status(400).send('Error: Completed is not a boolean');
   }
 
-  if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0){
+  if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
     validAttributes.description = body.description.trim();
   } else if (body.hasOwnProperty('description')) {
-    return res.status(400).send('Error: Description is not a string');
+        return res.status(400).send('Error: Description is not a string');
   }
 
   var matchedTodo = _.extend(matchedTodo, validAttributes);
