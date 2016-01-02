@@ -104,6 +104,12 @@ app.put('/todos/:id', function(req, res) {
   }
 
   if (body.hasOwnProperty('description')) {
+    console.log(typeof body.description);
+    if (typeof body.description !== 'string') {
+      return res.json({
+        error: 'Description must be a string of text'
+      });
+    }
     attributes.description = body.description.trim();
   }
 
