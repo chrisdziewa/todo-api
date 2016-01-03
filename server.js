@@ -7,9 +7,6 @@ var db = require('./db.js');
 
 app.use(bodyParser.json());
 
-var todoNextId = 1;
-var todos = [];
-
 app.get('/', function(req, res) {
   res.send('Todo API Root');
 });
@@ -131,6 +128,22 @@ app.put('/todos/:id', function(req, res) {
     res.status(400).json(e);
   });
 });
+
+
+/* ====== User routes ======*/
+
+// POST /users
+
+app.post('/users', function(req, res) {
+  var body = _.pick(req.body, 'email', 'password');
+  db.user.create(body).then(function(todo) {
+    res.json(todo);
+  }, function(e) {
+    res.status(400).json(e);
+  });
+});
+
+
 
 db.sequelize.sync().then(function() {
   app.listen(PORT, function() {
