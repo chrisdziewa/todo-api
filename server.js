@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
 var bcrypt = require('bcrypt');
+var middleware = require('./middleware')(db);
 
 app.use(bodyParser.json());
 
@@ -12,8 +13,10 @@ app.get('/', function(req, res) {
   res.send('Todo API Root');
 });
 
+
+
 // GET /todos
-app.get('/todos', function(req, res) {
+app.get('/todos', middleware.requireAuthentication, function(req, res) {
   var query = req.query;
   var where = {};
 
@@ -38,7 +41,7 @@ app.get('/todos', function(req, res) {
 });
 
 // GET /todos/:id
-app.get('/todos/:id', function(req, res) {
+app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
   var id = parseInt(req.params.id, 10);
 
   db.todo.findById(id).then(function(todo) {
@@ -55,7 +58,7 @@ app.get('/todos/:id', function(req, res) {
 });
 
 // POST
-app.post('/todos', function(req, res) {
+app.post('/todos', middleware.requireAuthentication, function(req, res) {
   var body = _.pick(req.body, 'description', 'completed');
   var description = body.description.trim();
 
@@ -70,7 +73,7 @@ app.post('/todos', function(req, res) {
 });
 
 // DELETE
-app.delete('/todos/:id', function(req, res) {
+app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
   var id = parseInt(req.params.id, 10);
   
   db.todo.destroy({
@@ -92,7 +95,7 @@ app.delete('/todos/:id', function(req, res) {
 });
 
 // PUT
-app.put('/todos/:id', function(req, res) {
+app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
   var id = parseInt(req.params.id, 10);
   var body = _.pick(req.body, 'description', 'completed');
   var attributes = {};
@@ -153,7 +156,7 @@ app.post('/users/login', function(req, res) {
     if (token) {
       res.header('Auth', token).json(user.toPublicJSON());
     } else {
-      res.status(401).send('Authentication failed');
+      return res.status(401).send('Authentication failed');
     }
 
   }, function(e) {
@@ -161,7 +164,7 @@ app.post('/users/login', function(req, res) {
   });
 });
 
-db.sequelize.sync({force: true}).then(function() {
+db.sequelize.sync().then(function() {
   app.listen(PORT, function() {
     console.log('Server listening on port ' + PORT);
   });
