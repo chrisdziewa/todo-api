@@ -7,9 +7,8 @@ module.exports = function(db) {
 				req.user = user;
 				next();
 			}, function(e) {
-				return res.status(401).send('Error completing your request');
+				res.status(401).send(e);
 			});
-			next();
 		}
 	};
 };

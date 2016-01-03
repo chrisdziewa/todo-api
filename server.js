@@ -5,7 +5,7 @@ var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
 var bcrypt = require('bcrypt');
-var middleware = require('./middleware')(db);
+var middleware = require('./middleware.js')(db);
 
 app.use(bodyParser.json());
 
@@ -57,16 +57,20 @@ app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
   });
 });
 
-// POST
+// POST /todos
 app.post('/todos', middleware.requireAuthentication, function(req, res) {
   var body = _.pick(req.body, 'description', 'completed');
-  var description = body.description.trim();
+  
+  if (typeof body.description === 'string') {
+    body.description = body.description.trim();
+  } 
 
-  db.todo.create({
-    description: description,
-    completed: body.completed
-  }).then(function(todo) {
-    res.json(todo);
+  db.todo.create(body).then(function(todo) {
+    req.user.addTodo(todo).then(function() {
+      return todo.reload();
+    }).then(function() {
+      res.json(todo.toJSON());
+    });
   }, function(e) {
     res.status(400).json(e);
   });
@@ -164,7 +168,7 @@ app.post('/users/login', function(req, res) {
   });
 });
 
-db.sequelize.sync().then(function() {
+db.sequelize.sync({force: true}).then(function() {
   app.listen(PORT, function() {
     console.log('Server listening on port ' + PORT);
   });
