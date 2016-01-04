@@ -193,7 +193,7 @@ app.delete('/users/login', middleware.requireAuthentication, function(req, res) 
   });
 });
 
-db.sequelize.sync({force: true}).then(function() {
+db.sequelize.sync().then(function() {
   app.listen(PORT, function() {
     console.log('Server listening on port ' + PORT);
   });
